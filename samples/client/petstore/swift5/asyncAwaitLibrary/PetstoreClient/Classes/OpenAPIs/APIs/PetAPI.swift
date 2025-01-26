@@ -16,21 +16,11 @@ open class PetAPI {
      Add a new pet to the store
      
      - parameter body: (body) Pet object that needs to be added to the store 
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: Void
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func addPet(body: Pet, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            addPetWithRequestBuilder(body: body).execute(apiResponseQueue) { result in
-                switch result {
-                case .success:
-                    continuation.resume(returning: ())
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func addPet(body: Pet) async throws {
+        return try await addPetWithRequestBuilder(body: body).execute().body
     }
 
     /**
@@ -39,6 +29,9 @@ open class PetAPI {
      - OAuth:
        - type: oauth2
        - name: petstore_auth
+     - API Key:
+       - type: apiKey api_key_query (QUERY)
+       - name: api_key_query
      - parameter body: (body) Pet object that needs to be added to the store 
      - returns: RequestBuilder<Void> 
      */
@@ -50,14 +43,14 @@ open class PetAPI {
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
         let localVariableNillableHeaders: [String: Any?] = [
-            :
+            "Content-Type": "application/json",
         ]
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
         let localVariableRequestBuilder: RequestBuilder<Void>.Type = PetstoreClientAPI.requestBuilderFactory.getNonDecodableBuilder()
 
-        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
@@ -65,21 +58,11 @@ open class PetAPI {
      
      - parameter petId: (path) Pet id to delete 
      - parameter apiKey: (header)  (optional)
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: Void
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func deletePet(petId: Int64, apiKey: String? = nil, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            deletePetWithRequestBuilder(petId: petId, apiKey: apiKey).execute(apiResponseQueue) { result in
-                switch result {
-                case .success:
-                    continuation.resume(returning: ())
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func deletePet(petId: Int64, apiKey: String? = nil) async throws {
+        return try await deletePetWithRequestBuilder(petId: petId, apiKey: apiKey).execute().body
     }
 
     /**
@@ -110,7 +93,7 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<Void>.Type = PetstoreClientAPI.requestBuilderFactory.getNonDecodableBuilder()
 
-        return localVariableRequestBuilder.init(method: "DELETE", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "DELETE", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
@@ -126,21 +109,11 @@ open class PetAPI {
      Finds Pets by status
      
      - parameter status: (query) Status values that need to be considered for filter 
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: [Pet]
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func findPetsByStatus(status: [String], apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws -> [Pet] {
-        return try await withCheckedThrowingContinuation { continuation in
-            findPetsByStatusWithRequestBuilder(status: status).execute(apiResponseQueue) { result in
-                switch result {
-                case let .success(response):
-                    continuation.resume(returning: response.body!)
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func findPetsByStatus(status: [Status_findPetsByStatus]) async throws -> [Pet] {
+        return try await findPetsByStatusWithRequestBuilder(status: status).execute().body
     }
 
     /**
@@ -153,14 +126,14 @@ open class PetAPI {
      - parameter status: (query) Status values that need to be considered for filter 
      - returns: RequestBuilder<[Pet]> 
      */
-    open class func findPetsByStatusWithRequestBuilder(status: [String]) -> RequestBuilder<[Pet]> {
+    open class func findPetsByStatusWithRequestBuilder(status: [Status_findPetsByStatus]) -> RequestBuilder<[Pet]> {
         let localVariablePath = "/pet/findByStatus"
         let localVariableURLString = PetstoreClientAPI.basePath + localVariablePath
         let localVariableParameters: [String: Any]? = nil
 
         var localVariableUrlComponents = URLComponents(string: localVariableURLString)
         localVariableUrlComponents?.queryItems = APIHelper.mapValuesToQueryItems([
-            "status": status.encodeToJSON(),
+            "status": (wrappedValue: status.encodeToJSON(), isExplode: false),
         ])
 
         let localVariableNillableHeaders: [String: Any?] = [
@@ -171,29 +144,19 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<[Pet]>.Type = PetstoreClientAPI.requestBuilderFactory.getBuilder()
 
-        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
      Finds Pets by tags
      
      - parameter tags: (query) Tags to filter by 
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: [Pet]
      */
     @available(*, deprecated, message: "This operation is deprecated.")
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func findPetsByTags(tags: [String], apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws -> [Pet] {
-        return try await withCheckedThrowingContinuation { continuation in
-            findPetsByTagsWithRequestBuilder(tags: tags).execute(apiResponseQueue) { result in
-                switch result {
-                case let .success(response):
-                    continuation.resume(returning: response.body!)
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func findPetsByTags(tags: [String]) async throws -> [Pet] {
+        return try await findPetsByTagsWithRequestBuilder(tags: tags).execute().body
     }
 
     /**
@@ -214,7 +177,7 @@ open class PetAPI {
 
         var localVariableUrlComponents = URLComponents(string: localVariableURLString)
         localVariableUrlComponents?.queryItems = APIHelper.mapValuesToQueryItems([
-            "tags": tags.encodeToJSON(),
+            "tags": (wrappedValue: tags.encodeToJSON(), isExplode: false),
         ])
 
         let localVariableNillableHeaders: [String: Any?] = [
@@ -225,28 +188,18 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<[Pet]>.Type = PetstoreClientAPI.requestBuilderFactory.getBuilder()
 
-        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
      Find pet by ID
      
      - parameter petId: (path) ID of pet to return 
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: Pet
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func getPetById(petId: Int64, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws -> Pet {
-        return try await withCheckedThrowingContinuation { continuation in
-            getPetByIdWithRequestBuilder(petId: petId).execute(apiResponseQueue) { result in
-                switch result {
-                case let .success(response):
-                    continuation.resume(returning: response.body!)
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func getPetById(petId: Int64) async throws -> Pet {
+        return try await getPetByIdWithRequestBuilder(petId: petId).execute().body
     }
 
     /**
@@ -254,7 +207,7 @@ open class PetAPI {
      - GET /pet/{petId}
      - Returns a single pet
      - API Key:
-       - type: apiKey api_key 
+       - type: apiKey api_key (HEADER)
        - name: api_key
      - parameter petId: (path) ID of pet to return 
      - returns: RequestBuilder<Pet> 
@@ -277,28 +230,18 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<Pet>.Type = PetstoreClientAPI.requestBuilderFactory.getBuilder()
 
-        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
      Update an existing pet
      
      - parameter body: (body) Pet object that needs to be added to the store 
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: Void
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func updatePet(body: Pet, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            updatePetWithRequestBuilder(body: body).execute(apiResponseQueue) { result in
-                switch result {
-                case .success:
-                    continuation.resume(returning: ())
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func updatePet(body: Pet) async throws {
+        return try await updatePetWithRequestBuilder(body: body).execute().body
     }
 
     /**
@@ -318,14 +261,14 @@ open class PetAPI {
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
         let localVariableNillableHeaders: [String: Any?] = [
-            :
+            "Content-Type": "application/json",
         ]
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
         let localVariableRequestBuilder: RequestBuilder<Void>.Type = PetstoreClientAPI.requestBuilderFactory.getNonDecodableBuilder()
 
-        return localVariableRequestBuilder.init(method: "PUT", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "PUT", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
@@ -334,21 +277,11 @@ open class PetAPI {
      - parameter petId: (path) ID of pet that needs to be updated 
      - parameter name: (form) Updated name of the pet (optional)
      - parameter status: (form) Updated status of the pet (optional)
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: Void
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func updatePetWithForm(petId: Int64, name: String? = nil, status: String? = nil, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            updatePetWithFormWithRequestBuilder(petId: petId, name: name, status: status).execute(apiResponseQueue) { result in
-                switch result {
-                case .success:
-                    continuation.resume(returning: ())
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func updatePetWithForm(petId: Int64, name: String? = nil, status: String? = nil) async throws {
+        return try await updatePetWithFormWithRequestBuilder(petId: petId, name: name, status: status).execute().body
     }
 
     /**
@@ -386,7 +319,7 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<Void>.Type = PetstoreClientAPI.requestBuilderFactory.getNonDecodableBuilder()
 
-        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
@@ -395,21 +328,11 @@ open class PetAPI {
      - parameter petId: (path) ID of pet to update 
      - parameter additionalMetadata: (form) Additional data to pass to server (optional)
      - parameter file: (form) file to upload (optional)
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: ApiResponse
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func uploadFile(petId: Int64, additionalMetadata: String? = nil, file: URL? = nil, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws -> ApiResponse {
-        return try await withCheckedThrowingContinuation { continuation in
-            uploadFileWithRequestBuilder(petId: petId, additionalMetadata: additionalMetadata, file: file).execute(apiResponseQueue) { result in
-                switch result {
-                case let .success(response):
-                    continuation.resume(returning: response.body!)
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func uploadFile(petId: Int64, additionalMetadata: String? = nil, file: URL? = nil) async throws -> ApiResponse {
+        return try await uploadFileWithRequestBuilder(petId: petId, additionalMetadata: additionalMetadata, file: file).execute().body
     }
 
     /**
@@ -447,7 +370,7 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<ApiResponse>.Type = PetstoreClientAPI.requestBuilderFactory.getBuilder()
 
-        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 
     /**
@@ -456,21 +379,11 @@ open class PetAPI {
      - parameter petId: (path) ID of pet to update 
      - parameter requiredFile: (form) file to upload 
      - parameter additionalMetadata: (form) Additional data to pass to server (optional)
-     - parameter apiResponseQueue: The queue on which api response is dispatched.
      - returns: ApiResponse
      */
-    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
-    open class func uploadFileWithRequiredFile(petId: Int64, requiredFile: URL, additionalMetadata: String? = nil, apiResponseQueue: DispatchQueue = PetstoreClientAPI.apiResponseQueue) async throws -> ApiResponse {
-        return try await withCheckedThrowingContinuation { continuation in
-            uploadFileWithRequiredFileWithRequestBuilder(petId: petId, requiredFile: requiredFile, additionalMetadata: additionalMetadata).execute(apiResponseQueue) { result in
-                switch result {
-                case let .success(response):
-                    continuation.resume(returning: response.body!)
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    open class func uploadFileWithRequiredFile(petId: Int64, requiredFile: URL, additionalMetadata: String? = nil) async throws -> ApiResponse {
+        return try await uploadFileWithRequiredFileWithRequestBuilder(petId: petId, requiredFile: requiredFile, additionalMetadata: additionalMetadata).execute().body
     }
 
     /**
@@ -508,6 +421,6 @@ open class PetAPI {
 
         let localVariableRequestBuilder: RequestBuilder<ApiResponse>.Type = PetstoreClientAPI.requestBuilderFactory.getBuilder()
 
-        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters)
+        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: true)
     }
 }

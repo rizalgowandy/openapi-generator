@@ -19,7 +19,7 @@
   {{#hasAuthMethods}}
     <ol>
     {{#authMethods}}
-      <li>{{#isBasic}}HTTP Basic Authentication{{/isBasic}}{{#isOAuth}}OAuth AuthorizationUrl:{{authorizationUrl}}TokenUrl:{{tokenUrl}}{{/isOAuth}}{{#isApiKey}}APIKey KeyParamName:{{keyParamName}} KeyInQuery:{{isKeyInQuery}} KeyInHeader:{{isKeyInHeader}}{{/isApiKey}}</li>
+      <li>{{#isBasicBasic}}HTTP Basic Authentication{{/isBasicBasic}}{{#isBasicBearer}}HTTP Bearer Token authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}{{/isBasicBearer}}{{#isHttpSignature}}HTTP signature authentication{{/isHttpSignature}}{{#isOAuth}}OAuth AuthorizationUrl:{{authorizationUrl}}TokenUrl:{{tokenUrl}}{{/isOAuth}}{{#isApiKey}}APIKey KeyParamName:{{keyParamName}} KeyInQuery:{{isKeyInQuery}} KeyInHeader:{{isKeyInHeader}}{{/isApiKey}}</li>
     {{/authMethods}}
     </ol>
   {{/hasAuthMethods}}
@@ -134,7 +134,7 @@
     {{#responses}}
     <h4 class="field-label">{{code}}</h4>
     {{message}}
-        {{#simpleType}}<a href="#{{dataType}}">{{dataType}}</a>{{/simpleType}}
+        {{^containerType}}<a href="#{{dataType}}">{{dataType}}</a>{{/containerType}}
     {{#examples}}
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: {{{contentType}}}</div>
