@@ -16,6 +16,10 @@
 
 package org.openapitools.codegen.languages;
 
+import io.swagger.v3.oas.models.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import io.swagger.v3.oas.models.media.Schema;
 import org.openapitools.codegen.*;
 
 import java.io.File;
@@ -89,10 +93,10 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
 
             String includeStatement = "include::{" + attributePathReference + "}" + escapeCurlyBrackets(relativeFileName) + "[opts=optional]";
             if (Files.isRegularFile(filePathToInclude)) {
-                LOGGER.debug("including {}. file into markup from: {}", ++includeCount, filePathToInclude.toString());
+                LOGGER.debug("including {}. file into markup from: {}", ++includeCount, filePathToInclude);
                 out.write("\n" + includeStatement + "\n");
             } else {
-                LOGGER.debug("{}. file not found, skip include for: {}", ++notFoundCount, filePathToInclude.toString());
+                LOGGER.debug("{}. file not found, skip include for: {}", ++notFoundCount, filePathToInclude);
                 out.write("\n// markup not found, no " + includeStatement + "\n");
             }
         }
@@ -140,10 +144,10 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
             final Path filePathToLinkTo = Paths.get(basePath, relativeFileName).toAbsolutePath();
 
             if (Files.isRegularFile(filePathToLinkTo)) {
-                LOGGER.debug("linking {}. file into markup from: {}", ++linkedCount, filePathToLinkTo.toString());
+                LOGGER.debug("linking {}. file into markup from: {}", ++linkedCount, filePathToLinkTo);
                 out.write("\n" + linkName + " link:" + relativeFileName + "[]\n");
             } else {
-                LOGGER.debug("{}. file not found, skip link for: {}", ++notFoundLinkCount, filePathToLinkTo.toString());
+                LOGGER.debug("{}. file not found, skip link for: {}", ++notFoundLinkCount, filePathToLinkTo);
                 out.write("\n// file not found, no " + linkName + " link :" + relativeFileName + "[]\n");
             }
         }
@@ -153,10 +157,15 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
     protected String groupId = "org.openapitools";
     protected String artifactId = "openapi-client";
     protected String artifactVersion = "1.0.0";
+    @Getter @Setter
     protected boolean headerAttributes = true;
+    @Getter @Setter
     protected boolean useIntroduction = false;
+    @Getter @Setter
     protected boolean skipExamples = false;
+    @Getter @Setter
     protected boolean useMethodAndPath = false;
+    @Getter @Setter
     protected boolean useTableTitles = false;
 
     private IncludeMarkupLambda includeSpecMarkupLambda;
@@ -217,7 +226,7 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
         outputFolder = "generated-code" + File.separator + "asciidoc";
         embeddedTemplateDir = templateDir = "asciidoc-documentation";
 
-        defaultIncludes = new HashSet<String>();
+        defaultIncludes = new HashSet<>();
 
         cliOptions.add(new CliOption("appName", "short name of the application"));
         cliOptions.add(new CliOption("appDescription", "description of the application"));
@@ -264,10 +273,10 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
         additionalProperties.put(CodegenConstants.ARTIFACT_VERSION, artifactVersion);
 
         supportingFiles.add(new SupportingFile("index.mustache", "", "index.adoc"));
-        reservedWords = new HashSet<String>();
+        reservedWords = new HashSet<>();
 
-        languageSpecificPrimitives = new HashSet<String>();
-        importMapping = new HashMap<String, String>();
+        languageSpecificPrimitives = new HashSet<>();
+        importMapping = new HashMap<>();
 
     }
 
@@ -281,51 +290,11 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
         return input; // just return the original string
     }
 
-    public boolean isHeaderAttributes() {
-        return headerAttributes;
-    }
-
-    public void setHeaderAttributes(boolean headerAttributes) {
-        this.headerAttributes = headerAttributes;
-    }
-
-    public boolean isUseIntroduction() {
-        return useIntroduction;
-    }
-
-    public void setUseIntroduction(boolean useIntroduction) {
-        this.useIntroduction = useIntroduction;
-    }
-
-    public boolean isSkipExamples() {
-        return skipExamples;
-    }
-
-    public void setSkipExamples(boolean skipExamples) {
-        this.skipExamples = skipExamples;
-    }
-
-    public boolean isUseMethodAndPath() {
-        return useMethodAndPath;
-    }
-
-    public void setUseMethodAndPath(boolean useMethodAndPath) {
-        this.useMethodAndPath = useMethodAndPath;
-    }
-
-    public boolean isUseTableTitles() {
-        return useTableTitles;
-    }
-
-    public void setUseTableTitles(boolean useTableTitles) {
-        this.useTableTitles = useTableTitles;
-    }
-
     @Override
     public void processOpts() {
         super.processOpts();
 
-        String specDir = this.additionalProperties.get(SPEC_DIR) + "";
+        String specDir = String.valueOf(this.additionalProperties.get(SPEC_DIR));
         if (!Files.isDirectory(Paths.get(specDir))) {
             LOGGER.warn("base part for include markup lambda not found: {} as {}", specDir, Paths.get(specDir).toAbsolutePath());
         }
@@ -333,7 +302,7 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
         this.includeSpecMarkupLambda = new IncludeMarkupLambda(SPEC_DIR,specDir);
         additionalProperties.put("specinclude", this.includeSpecMarkupLambda);
 
-        String snippetDir = this.additionalProperties.get(SNIPPET_DIR) + "";
+        String snippetDir = String.valueOf(this.additionalProperties.get(SNIPPET_DIR));
         if (!Files.isDirectory(Paths.get(snippetDir))) {
             LOGGER.warn("base part for include markup lambda not found: {} as {}", snippetDir, Paths.get(snippetDir).toAbsolutePath());
         }
@@ -357,6 +326,27 @@ public class AsciidocDocumentationCodegen extends DefaultCodegen implements Code
         } else {
             additionalProperties.put(flag, value);
         }
+    }
+
+    // override to avoid printing of string "null"
+    // when no example exists
+    @Override
+    public String toExampleValue(Schema schema) {
+        if (schema.getExample() != null) {
+            return schema.getExample().toString();
+        }
+        return null;
+    }
+
+    // Avoid additional escapes of \ -> \\, " -> \"
+    // in regular expressions that are
+    // introduced by the `escapeText` method.
+    // Note: We don't need this here since we want to print
+    // the plain regular expression
+    // Therefore, override  this method to skip `escapeText`.
+    @Override
+    public String toRegularExpression(String pattern) {
+        return addRegularExpressionDelimiter(pattern);
     }
 
     @Override

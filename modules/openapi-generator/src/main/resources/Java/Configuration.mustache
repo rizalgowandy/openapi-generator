@@ -4,7 +4,9 @@ package {{invokerPackage}};
 
 {{>generatedAnnotation}}
 public class Configuration {
-    private static ApiClient defaultApiClient = new ApiClient();
+    public static final String VERSION = "{{{artifactVersion}}}";
+
+    private static volatile ApiClient defaultApiClient = new ApiClient();
 
     /**
      * Get the default API client, which would be used when creating API
