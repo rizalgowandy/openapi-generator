@@ -1,41 +1,44 @@
 cmake_minimum_required (VERSION 2.6...3.10.2)
-project (CGenerator)
+project (CGenerator C)
 
 cmake_policy(SET CMP0063 NEW)
 
 set(CMAKE_C_VISIBILITY_PRESET default)
-set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN OFF)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=missing-declarations")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=int-conversion")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 find_package(OpenSSL)
 
 if (OPENSSL_FOUND)
-    message (STATUS "OPENSSL found")
-
-    set(CMAKE_C_FLAGS "-DOPENSSL")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DOPENSSL")
     if(CMAKE_VERSION VERSION_LESS 3.4)
         include_directories(${OPENSSL_INCLUDE_DIR})
         include_directories(${OPENSSL_INCLUDE_DIRS})
         link_directories(${OPENSSL_LIBRARIES})
     endif()
-
-    message(STATUS "Using OpenSSL ${OPENSSL_VERSION}")
-else()
-    message (STATUS "OpenSSL Not found.")
 endif()
 
 set(pkgName "{{projectName}}")
-set(VERSION 0.0.1) # this default version can be overridden in PreTarget.cmake
 
-find_package(CURL 7.58.0 REQUIRED)
-if(CURL_FOUND)
+# this default version can be overridden in PreTarget.cmake
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 0)
+set(PROJECT_VERSION_PATCH 1)
+
+if( (DEFINED CURL_INCLUDE_DIR) AND (DEFINED CURL_LIBRARIES))
     include_directories(${CURL_INCLUDE_DIR})
     set(PLATFORM_LIBRARIES ${PLATFORM_LIBRARIES} ${CURL_LIBRARIES} )
-else(CURL_FOUND)
-    message(FATAL_ERROR "Could not find the CURL library and development files.")
+else()
+    find_package(CURL 7.58.0 REQUIRED)
+    if(CURL_FOUND)
+        include_directories(${CURL_INCLUDE_DIR})
+        set(PLATFORM_LIBRARIES ${PLATFORM_LIBRARIES} ${CURL_LIBRARIES} )
+    endif()
 endif()
 
 set(SRCS
@@ -47,13 +50,13 @@ set(SRCS
     model/object.c
 {{#models}}
 {{#model}}
-    model/{{classname}}.c
+    model/{{classFilename}}.c
 {{/model}}
 {{/models}}
 {{#apiInfo}}
 {{#apis}}
 {{#operations}}
-    api/{{classname}}.c
+    api/{{classFilename}}.c
 {{/operations}}
 {{/apis}}
 {{/apiInfo}}
@@ -67,15 +70,16 @@ set(HDRS
     include/keyValuePair.h
     external/cJSON.h
     model/object.h
+    model/any_type.h
 {{#models}}
 {{#model}}
-    model/{{classname}}.h
+    model/{{classFilename}}.h
 {{/model}}
 {{/models}}
 {{#apiInfo}}
 {{#apis}}
 {{#operations}}
-    api/{{classname}}.h
+    api/{{classFilename}}.h
 {{/operations}}
 {{/apis}}
 {{/apiInfo}}
@@ -83,6 +87,8 @@ set(HDRS
 )
 
 include(PreTarget.cmake OPTIONAL)
+
+set(PROJECT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 # Add library with project file with project name as library name
 add_library(${pkgName} ${SRCS} ${HDRS})
@@ -100,22 +106,22 @@ include(PostTarget.cmake OPTIONAL)
 
 # installation of libraries, headers, and config files
 if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in)
-    install(TARGETS ${pkgName} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(TARGETS ${pkgName} DESTINATION lib)
 else()
     include(GNUInstallDirs)
-    install(TARGETS ${pkgName} DESTINATION ${CMAKE_INSTALL_PREFIX} EXPORT ${pkgName}Targets)
+    install(TARGETS ${pkgName} DESTINATION lib EXPORT ${pkgName}Targets)
 
     foreach(HDR_FILE ${HDRS})
         get_filename_component(HDR_DIRECTORY ${HDR_FILE} DIRECTORY)
         get_filename_component(ABSOLUTE_HDR_DIRECTORY ${HDR_DIRECTORY} ABSOLUTE)
         file(RELATIVE_PATH RELATIVE_HDR_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${ABSOLUTE_HDR_DIRECTORY})
-        install(FILES ${HDR_FILE} DESTINATION include/${RELATIVE_HDR_PATH})
+        install(FILES ${HDR_FILE} DESTINATION include/${pkgName}/${RELATIVE_HDR_PATH})
     endforeach()
 
     include(CMakePackageConfigHelpers)
     write_basic_package_version_file(
             "${CMAKE_CURRENT_BINARY_DIR}/${pkgName}/${pkgName}ConfigVersion.cmake"
-            VERSION "${VERSION}"
+            VERSION "${PROJECT_VERSION_STRING}"
             COMPATIBILITY AnyNewerVersion
     )
 
@@ -146,6 +152,9 @@ else()
             ${ConfigPackageLocation}
     )
 endif()
+
+# make installation packages
+include(Packing.cmake OPTIONAL)
 
 # Setting file variables to null
 set(SRCS "")

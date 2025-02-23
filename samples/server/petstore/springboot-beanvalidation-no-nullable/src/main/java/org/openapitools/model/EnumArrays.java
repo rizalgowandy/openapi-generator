@@ -1,5 +1,6 @@
 package org.openapitools.model;
 
+import java.net.URI;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -7,15 +8,24 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.springframework.lang.Nullable;
+import java.time.OffsetDateTime;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+
+
+import java.util.*;
+import javax.annotation.Generated;
 
 /**
  * EnumArrays
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen")
-public class EnumArrays   {
+
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", comments = "Generator version: 7.12.0-SNAPSHOT")
+public class EnumArrays {
+
   /**
    * Gets or Sets justSymbol
    */
@@ -51,8 +61,7 @@ public class EnumArrays   {
     }
   }
 
-  @JsonProperty("just_symbol")
-  private JustSymbolEnum justSymbol;
+  private @Nullable JustSymbolEnum justSymbol;
 
   /**
    * Gets or Sets arrayEnum
@@ -89,9 +98,8 @@ public class EnumArrays   {
     }
   }
 
-  @JsonProperty("array_enum")
   @Valid
-  private List<ArrayEnumEnum> arrayEnum = null;
+  private List<ArrayEnumEnum> arrayEnum = new ArrayList<>();
 
   public EnumArrays justSymbol(JustSymbolEnum justSymbol) {
     this.justSymbol = justSymbol;
@@ -101,10 +109,10 @@ public class EnumArrays   {
   /**
    * Get justSymbol
    * @return justSymbol
-  */
+   */
+  
   @ApiModelProperty(value = "")
-
-
+  @JsonProperty("just_symbol")
   public JustSymbolEnum getJustSymbol() {
     return justSymbol;
   }
@@ -120,7 +128,7 @@ public class EnumArrays   {
 
   public EnumArrays addArrayEnumItem(ArrayEnumEnum arrayEnumItem) {
     if (this.arrayEnum == null) {
-      this.arrayEnum = new ArrayList<ArrayEnumEnum>();
+      this.arrayEnum = new ArrayList<>();
     }
     this.arrayEnum.add(arrayEnumItem);
     return this;
@@ -129,10 +137,10 @@ public class EnumArrays   {
   /**
    * Get arrayEnum
    * @return arrayEnum
-  */
+   */
+  
   @ApiModelProperty(value = "")
-
-
+  @JsonProperty("array_enum")
   public List<ArrayEnumEnum> getArrayEnum() {
     return arrayEnum;
   }
@@ -140,7 +148,6 @@ public class EnumArrays   {
   public void setArrayEnum(List<ArrayEnumEnum> arrayEnum) {
     this.arrayEnum = arrayEnum;
   }
-
 
   @Override
   public boolean equals(Object o) {
@@ -164,7 +171,6 @@ public class EnumArrays   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class EnumArrays {\n");
-    
     sb.append("    justSymbol: ").append(toIndentedString(justSymbol)).append("\n");
     sb.append("    arrayEnum: ").append(toIndentedString(arrayEnum)).append("\n");
     sb.append("}");

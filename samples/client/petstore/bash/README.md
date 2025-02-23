@@ -38,6 +38,9 @@ $ echo '<body_content>' | petstore-cli --host <hostname> --content-type json <op
 # }
 $ echo '<body_content>' | petstore-cli --host <hostname> --content-type json <operationId> key1==value1 key2=value2 key3:=23 -
 
+# Make POST request with form data
+$ petstore-cli --host <hostname> <operationId> key1:=value1 key2:=value2 key3:=23
+
 # Preview the cURL command without actually executing it
 $ petstore-cli --host http://<hostname>:<port> --dry-run <operationid>
 
@@ -160,15 +163,12 @@ Class | Method | HTTP request | Description
  - [ArrayOfNumberOnly](docs/ArrayOfNumberOnly.md)
  - [ArrayTest](docs/ArrayTest.md)
  - [BigCat](docs/BigCat.md)
- - [BigCatAllOf](docs/BigCatAllOf.md)
  - [Capitalization](docs/Capitalization.md)
  - [Cat](docs/Cat.md)
- - [CatAllOf](docs/CatAllOf.md)
  - [Category](docs/Category.md)
  - [ClassModel](docs/ClassModel.md)
  - [Client](docs/Client.md)
  - [Dog](docs/Dog.md)
- - [DogAllOf](docs/DogAllOf.md)
  - [EnumArrays](docs/EnumArrays.md)
  - [EnumClass](docs/EnumClass.md)
  - [EnumTest](docs/EnumTest.md)
@@ -197,6 +197,16 @@ Class | Method | HTTP request | Description
 ## Documentation For Authorization
 
 
+## petstore_auth
+
+
+- **Type**: OAuth
+- **Flow**: implicit
+- **Authorization URL**: http://petstore.swagger.io/api/oauth/dialog
+- **Scopes**:
+  - **write:pets**: modify pets in your account
+  - **read:pets**: read your pets
+
 ## api_key
 
 
@@ -213,15 +223,6 @@ Class | Method | HTTP request | Description
 
 ## http_basic_test
 
+
 - **Type**: HTTP basic authentication
-
-## petstore_auth
-
-
-- **Type**: OAuth
-- **Flow**: implicit
-- **Authorization URL**: http://petstore.swagger.io/api/oauth/dialog
-- **Scopes**:
-  - **write:pets**: modify pets in your account
-  - **read:pets**: read your pets
 

@@ -4,6 +4,7 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.EncodingUtils;
 import org.openapitools.client.model.ApiResponse;
 
+import java.time.OffsetDateTime;
 import org.openapitools.client.model.User;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import feign.*;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0-SNAPSHOT")
 public interface UserApi extends ApiClient.Api {
 
 
@@ -130,7 +131,7 @@ public interface UserApi extends ApiClient.Api {
    */
   @RequestLine("GET /user/{username}")
   @Headers({
-    "Accept: application/json",
+    "Accept: application/json,application/xml",
   })
   User getUserByName(@Param("username") String username);
 
@@ -143,7 +144,7 @@ public interface UserApi extends ApiClient.Api {
    */
   @RequestLine("GET /user/{username}")
   @Headers({
-    "Accept: application/json",
+    "Accept: application/json,application/xml",
   })
   ApiResponse<User> getUserByNameWithHttpInfo(@Param("username") String username);
 
@@ -158,7 +159,7 @@ public interface UserApi extends ApiClient.Api {
    */
   @RequestLine("GET /user/login?username={username}&password={password}")
   @Headers({
-    "Accept: application/json",
+    "Accept: application/json,application/xml",
   })
   String loginUser(@Param("username") String username, @Param("password") String password);
 
@@ -172,7 +173,7 @@ public interface UserApi extends ApiClient.Api {
    */
   @RequestLine("GET /user/login?username={username}&password={password}")
   @Headers({
-    "Accept: application/json",
+    "Accept: application/json,application/xml",
   })
   ApiResponse<String> loginUserWithHttpInfo(@Param("username") String username, @Param("password") String password);
 
@@ -195,9 +196,9 @@ public interface UserApi extends ApiClient.Api {
    */
   @RequestLine("GET /user/login?username={username}&password={password}")
   @Headers({
-  "Accept: application/json",
+  "Accept: application/json,application/xml",
   })
-  String loginUser(@QueryMap(encoded=true) Map<String, Object> queryParams);
+  String loginUser(@QueryMap(encoded=true) LoginUserQueryParams queryParams);
 
   /**
   * Logs user into the system
@@ -214,9 +215,9 @@ public interface UserApi extends ApiClient.Api {
       */
       @RequestLine("GET /user/login?username={username}&password={password}")
       @Headers({
-    "Accept: application/json",
+    "Accept: application/json,application/xml",
       })
-   ApiResponse<String> loginUserWithHttpInfo(@QueryMap(encoded=true) Map<String, Object> queryParams);
+   ApiResponse<String> loginUserWithHttpInfo(@QueryMap(encoded=true) LoginUserQueryParams queryParams);
 
 
    /**

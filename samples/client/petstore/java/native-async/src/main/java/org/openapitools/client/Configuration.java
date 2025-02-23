@@ -13,9 +13,11 @@
 
 package org.openapitools.client;
 
-@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0-SNAPSHOT")
 public class Configuration {
-    private static ApiClient defaultApiClient = new ApiClient();
+    public static final String VERSION = "1.0.0";
+
+    private static volatile ApiClient defaultApiClient = new ApiClient();
 
     /**
      * Get the default API client, which would be used when creating API
